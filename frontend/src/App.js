@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import './App.css';
-import LeverageBox from './components/LeverageBox';
-import UserBalance from './components/UserBalance';
 import ConnectWallet from './components/ConnectWallet';
+import UserBalance from './components/UserBalance';
+import LeverageBox from './components/LeverageBox';
 import PositionHistory from './components/PositionHistory';
-
-// Import contract ABI
 import BTCLeverageTrainerABI from './contracts/BTCLeverageTrainer.json';
 
 function App() {
@@ -52,17 +50,21 @@ function App() {
     alert('Please install MetaMask!');
   }
 };
-       
 
   // Load market data
   const loadMarketData = async (contractInstance) => {
     try {
       const market = await contractInstance.getTodayMarket();
-      const priceInCents = Number(market[1]);
-      const price = priceInCents / 100;
-      setBtcPrice(price);
-      setTimeLeft(Number(market[2]));
       setCurrentDay(Number(market[0]));
+      const priceInDollars = Number(market[1]) / 100;
+      setBtcPrice(priceInDollars);
+      const isActive = market[2];
+      
+      if (!isActive) {
+        setTimeLeft(0);
+      } else {
+        setTimeLeft(3600);
+      }
     } catch (error) {
       console.error('Error loading market:', error);
     }
@@ -71,60 +73,42 @@ function App() {
   // Load user data
   const loadUserData = async (contractInstance, address) => {
     try {
-      const account = await contractInstance.getAccount(address);
-      const balanceInCents = Number(account[0]);
-      const balance = balanceInCents / 100;
+      const accountData = await contractInstance.getAccount(address);
+      const balanceInDollars = Number(accountData[0]) / 100;
+      setUserBalance(balanceInDollars);
       
-      setUserBalance(balance);
       setUserStats({
-        balance: balance,
-        totalTrades: Number(account[1]),
-        winningTrades: Number(account[2]),
-        totalPnL: Number(account[3]) / 100,
-        isNegativePnL: account[4],
-        streak: Number(account[5]),
-        bestStreak: Number(account[6])
+        totalTrades: Number(accountData[1]),
+        winningTrades: Number(accountData[2]),
+        totalPnL: Number(accountData[3]),
+        isNegativePnL: accountData[4],
+        streak: Number(accountData[5]),
+        bestStreak: Number(accountData[6])
       });
     } catch (error) {
       console.error('Error loading user data:', error);
     }
   };
 
-  // Initialize account
-  const handleInitialize = async () => {
+  const handleClaimBonus = async () => {
     if (!contract) return;
     try {
-      const tx = await contract.initializeAccount();
+      const tx = await contract.claimDailyBonus();
       await tx.wait();
-      alert('Account initialized! You have $1,000 to start trading! 🎉');
+      
+      // Get updated account to show new streak
+      const accountData = await contract.getAccount(account);
+      const newStreak = Number(accountData[5]);
+      const bonusAmount = 5 + newStreak;
+      
+      alert(`🎉 Daily bonus claimed! You received $${bonusAmount} (Streak: ${newStreak} days)`);
       loadUserData(contract, account);
     } catch (error) {
-      console.error('Error initializing:', error);
-      alert('Failed to initialize. You may already have an account.');
+      console.error('Error claiming bonus:', error);
+      alert('Failed to claim bonus. You may have already claimed today.');
     }
   };
 
-  // Claim daily bonus
-  const handleClaimBonus = async () => {
-  if (!contract) return;
-  try {
-    const tx = await contract.claimDailyBonus();
-    const receipt = await tx.wait();
-    
-    // Get updated account to show new streak
-    const accountData = await contract.getAccount(account);
-    const newStreak = Number(accountData[5]);
-    const bonusAmount = 5 + newStreak; // $5 base + $1 per streak day
-    
-    alert(`🎉 Daily bonus claimed! You received $${bonusAmount} (Streak: ${newStreak} days)`);
-    loadUserData(contract, account);
-  } catch (error) {
-    console.error('Error claiming bonus:', error);
-    alert('Failed to claim bonus. You may have already claimed today.');
-  }
-};
-
-  // Refresh data
   const refreshData = () => {
     if (contract && account) {
       loadMarketData(contract);
@@ -132,22 +116,26 @@ function App() {
     }
   };
 
-  // Format time left
-  const formatTimeLeft = (seconds) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    return `${hours}h ${minutes}m`;
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(prev => prev > 0 ? prev - 1 : 0);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatTime = (seconds) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    return `${h}h ${m}m`;
   };
 
   return (
-   <div className={`App ${darkMode ? 'dark-mode' : ''}`}>
+    <div className={`App ${darkMode ? 'dark-mode' : ''}`}>
       <header className="header">
         <div className="container">
           <h1>💰 BTC Leverage Trainer</h1>
           <p className="tagline">Learn leverage trading with virtual USD • Risk-free practice</p>
-          {!account ? (
-           <ConnectWallet onConnect={connectWallet} loading={loading} />
-          ) : (
+          {account && (
             <div className="user-info">
               <span className="address">{account.slice(0, 6)}...{account.slice(-4)}</span>
               <span className="balance">${userBalance.toFixed(2)}</span>
@@ -155,44 +143,42 @@ function App() {
           )}
         </div>
         <button 
-         className="dark-mode-toggle"
-         onClick={() => setDarkMode(!darkMode)}
-         title="Toggle dark mode"
+          className="dark-mode-toggle"
+          onClick={() => setDarkMode(!darkMode)}
+          title="Toggle dark mode"
         >
-         {darkMode ? '☀️' : '🌙'}
+          {darkMode ? '☀️' : '🌙'}
         </button>
       </header>
 
-      {account ? (
-        <main className="main">
-          <div className="container">
-            {/* User Balance Section */}
-            {userStats && (
-              <UserBalance 
-                stats={userStats} 
-                onClaimBonus={handleClaimBonus}
-                onInitialize={handleInitialize}
-              />
-            )}
+      <main className="container">
+        {!account ? (
+          <div className="welcome-section">
+            <h2>👋 Welcome! Get Started</h2>
+            <p>Initialize your account to receive $1,000 virtual money</p>
+            <ConnectWallet onConnect={connectWallet} loading={loading} />
+          </div>
+        ) : (
+          <>
+            <UserBalance 
+              balance={userBalance}
+              stats={userStats}
+              onClaimBonus={handleClaimBonus}
+            />
 
-            {/* Position History - Yesterday's positions */}
-            {contract && currentDay > 0 && (
-              <PositionHistory 
-                contract={contract}
-                account={account}
-                currentDay={currentDay}
-                onSuccess={refreshData}
-              />
-            )}
+            <PositionHistory 
+              contract={contract}
+              account={account}
+              currentDay={currentDay}
+              onSuccess={refreshData}
+            />
 
-            {/* Market Info */}
-            <div className="market-info">
-              <h2>Today's BTC Price: ${btcPrice.toLocaleString('en-US', {minimumFractionDigits: 2})}</h2>
-              <p className="question">Will BTC close higher or lower than yesterday?</p>
-              {timeLeft > 0 && <p className="time-left">Time left: {formatTimeLeft(timeLeft)}</p>}
-            </div>
+            <section className="market-info">
+              <h2>Today's BTC Price: ${btcPrice.toLocaleString()}</h2>
+              <p>Will BTC close higher or lower than yesterday?</p>
+              {timeLeft > 0 && <p className="time-left">Time left: {formatTime(timeLeft)}</p>}
+            </section>
 
-            {/* Three Leverage Boxes */}
             <div className="leverage-grid">
               <LeverageBox
                 title="1x Normal"
@@ -205,7 +191,6 @@ function App() {
                 account={account}
                 onSuccess={refreshData}
               />
-
               <LeverageBox
                 title="2x Leveraged"
                 subtitle="Moderate Risk"
@@ -217,7 +202,6 @@ function App() {
                 account={account}
                 onSuccess={refreshData}
               />
-
               <LeverageBox
                 title="10x Leveraged"
                 subtitle="HIGH RISK"
@@ -232,8 +216,7 @@ function App() {
               />
             </div>
 
-            {/* Educational Info */}
-            <div className="education-section">
+            <section className="education-section">
               <h3>💡 How It Works</h3>
               <div className="edu-grid">
                 <div className="edu-card">
@@ -253,32 +236,13 @@ function App() {
                   <p>At 10x, if BTC moves -10% against you, you lose everything.</p>
                 </div>
               </div>
-            </div>
-          </div>
-        </main>
-      ) : (
-        <div className="welcome">
-          <div className="container">
-            <h2>Learn Leverage Trading Without Risk! 🎯</h2>
-            <p>Practice with virtual USD and understand how leverage works</p>
-            <ul className="features">
-              <li>💰 Start with $1,000 virtual money</li>
-              <li>📊 Three leverage options: 1x, 2x, 10x</li>
-              <li>📈 Daily BTC predictions (higher or lower)</li>
-              <li>🎓 Learn about LONG, SHORT, and liquidation</li>
-              <li>⚡ Built on Avalanche for instant transactions</li>
-            </ul>
-            <button className="cta-button" onClick={connectWallet}>
-              Connect Wallet to Start Learning
-            </button>
-          </div>
-        </div>
-      )}
+            </section>
+          </>
+        )}
+      </main>
 
       <footer className="footer">
-        <div className="container">
-          <p>Built for Avalanche Retro9000 • Virtual money only - Learn risk-free!</p>
-        </div>
+        <p>Built for Avalanche Retro9000 • Virtual money only - Learn risk-free!</p>
       </footer>
     </div>
   );

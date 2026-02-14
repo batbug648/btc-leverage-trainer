@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import confetti from 'canvas-confetti';
 import './PositionHistory.css';
 
@@ -6,13 +6,7 @@ function PositionHistory({ contract, account, currentDay, onSuccess }) {
   const [yesterdayPositions, setYesterdayPositions] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (contract && account && currentDay > 0) {
-      loadYesterdayPositions();
-    }
-  }, [contract, account, currentDay]);
-
-  const loadYesterdayPositions = async () => {
+  const loadYesterdayPositions = useCallback(async () => {
     const yesterday = currentDay - 1;
     const positions = [];
 
@@ -43,69 +37,75 @@ function PositionHistory({ contract, account, currentDay, onSuccess }) {
     }
     
     setYesterdayPositions(positions);
-  };
+  }, [contract, account, currentDay]);
 
-const closePosition = async (leverage) => {
-  if (!contract) return;
-  setLoading(true);
-  try {
-    const yesterday = currentDay - 1;
-    
-    // Get position data before closing
-    const position = yesterdayPositions.find(p => p.leverage === leverage);
-    const pnl = calculatePnL(position);
-    
-    const tx = await contract.closePosition(yesterday, leverage);
-    await tx.wait();
-    
-    // Trigger confetti and sound for wins only!
-    if (pnl.isProfit) {
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
-      playWinSound();
-      alert('🎉 Winner! Position closed with profit!');
-    } else {
-      alert('Position closed. Better luck next time!');
+  useEffect(() => {
+    if (contract && account && currentDay > 0) {
+      loadYesterdayPositions();
     }
-    
-    loadYesterdayPositions();
-    onSuccess();
-  } catch (error) {
-    console.error('Error closing position:', error);
-    alert('Failed to close position.');
-  } finally {
-    setLoading(false);
-  }
-};
+  }, [contract, account, currentDay, loadYesterdayPositions]);
+
+  const closePosition = async (leverage) => {
+    if (!contract) return;
+    setLoading(true);
+    try {
+      const yesterday = currentDay - 1;
+      
+      // Get position data before closing
+      const position = yesterdayPositions.find(p => p.leverage === leverage);
+      const pnl = calculatePnL(position);
+      
+      const tx = await contract.closePosition(yesterday, leverage);
+      await tx.wait();
+      
+      // Trigger confetti and sound for wins only!
+      if (pnl.isProfit) {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+        playWinSound();
+        alert('🎉 Winner! Position closed with profit!');
+      } else {
+        alert('Position closed. Better luck next time!');
+      }
+      
+      loadYesterdayPositions();
+      onSuccess();
+    } catch (error) {
+      console.error('Error closing position:', error);
+      alert('Failed to close position.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const calculatePnL = (position) => {
-  const priceChange = ((position.endPrice - position.startPrice) / position.startPrice) * 100;
-  const multiplier = position.leverage === 0 ? 1 : position.leverage === 1 ? 2 : 10;
-  let pnlPercent = position.direction === 'LONG' ? priceChange * multiplier : -priceChange * multiplier;
-  
-  // Check for 10x liquidation
-  let isLiquidated = false;
-  if (position.leverage === 2) { // 10x leverage
-    if ((position.direction === 'LONG' && priceChange <= -10) ||
-        (position.direction === 'SHORT' && priceChange >= 10)) {
-      isLiquidated = true;
+    const priceChange = ((position.endPrice - position.startPrice) / position.startPrice) * 100;
+    const multiplier = position.leverage === 0 ? 1 : position.leverage === 1 ? 2 : 10;
+    let pnlPercent = position.direction === 'LONG' ? priceChange * multiplier : -priceChange * multiplier;
+    
+    // Check for 10x liquidation
+    let isLiquidated = false;
+    if (position.leverage === 2) {
+      if ((position.direction === 'LONG' && priceChange <= -10) ||
+          (position.direction === 'SHORT' && priceChange >= 10)) {
+        isLiquidated = true;
+      }
     }
-  }
-  
-  const pnlAmount = isLiquidated ? -position.amount : (position.amount * pnlPercent) / 100;
-  const finalAmount = isLiquidated ? 0 : Math.max(0, position.amount + pnlAmount);
-  
-  return {
-    pnlAmount: pnlAmount,
-    finalAmount: finalAmount,
-    isProfit: pnlAmount > 0,
-    priceChange: priceChange,
-    isLiquidated: isLiquidated
+    
+    const pnlAmount = isLiquidated ? -position.amount : (position.amount * pnlPercent) / 100;
+    const finalAmount = isLiquidated ? 0 : Math.max(0, position.amount + pnlAmount);
+    
+    return {
+      pnlAmount: pnlAmount,
+      finalAmount: finalAmount,
+      isProfit: pnlAmount > 0,
+      priceChange: priceChange,
+      isLiquidated: isLiquidated
+    };
   };
-};
 
   const playWinSound = () => {
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
