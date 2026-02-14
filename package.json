@@ -1,0 +1,31 @@
+{
+  "name": "avalanche-predictions",
+  "version": "1.0.0",
+  "description": "Multi-category prediction market on Avalanche - Retro9000 Contest Entry",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:fuji": "hardhat run scripts/deploy.js --network fuji",
+    "deploy:mainnet": "hardhat run scripts/deploy.js --network mainnet",
+    "verify": "hardhat run scripts/verify.js --network mainnet",
+    "frontend": "cd frontend && npm start"
+  },
+  "keywords": [
+    "avalanche",
+    "predictions",
+    "web3",
+    "retro9000"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "hardhat": "^2.19.5"
+  },
+  "dependencies": {
+    "@chainlink/contracts": "^0.8.0",
+    "@openzeppelin/contracts": "^5.4.0",
+    "dotenv": "^16.4.1"
+  }
+}

@@ -1,0 +1,116 @@
+.position-history {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-bottom: 2rem;
+}
+
+.position-history h3 {
+  font-size: 1.5rem;
+  color: #1e3a8a;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.positions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.position-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border-left: 4px solid #3b82f6;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.position-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+.position-card.profit {
+  border-left-color: #10b981;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+}
+
+.position-card.loss {
+  border-left-color: #ef4444;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+}
+
+.position-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.direction {
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+}
+
+.direction.long { background: #10b981; color: white; }
+.direction.short { background: #ef4444; color: white; }
+
+.position-details { margin-bottom: 1rem; }
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.detail-row .positive { color: #10b981; }
+.detail-row .negative { color: #ef4444; }
+
+.pnl-display {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 1rem;
+  border: 2px solid #e5e7eb;
+}
+
+.pnl-display.profit { background: #f0fdf4; border-color: #10b981; }
+.pnl-display.loss { background: #fef2f2; border-color: #ef4444; }
+
+.pnl-value {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.pnl-display.profit .pnl-value { color: #10b981; }
+.pnl-display.loss .pnl-value { color: #ef4444; }
+
+.close-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  color: white;
+  border: none;
+  padding: 1rem;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.claimed-badge {
+  text-align: center;
+  padding: 1rem;
+  border-radius: 8px;
+  font-weight: 700;
+  background: #f0fdf4;
+  color: #059669;
+  border: 2px solid #10b981;
+}

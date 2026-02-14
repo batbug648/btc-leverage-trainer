@@ -1,0 +1,134 @@
+.leverage-box {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s;
+}
+
+.leverage-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.leverage-0 { border-top: 4px solid #3b82f6; }
+.leverage-1 { border-top: 4px solid #f59e0b; }
+.leverage-2 { border-top: 4px solid #ef4444; }
+
+.box-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.box-icon { font-size: 2.5rem; }
+
+.box-title h3 {
+  font-size: 1.3rem;
+  color: #1e3a8a;
+  margin-bottom: 0.25rem;
+}
+
+.subtitle {
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.box-description { margin-bottom: 1.5rem; }
+
+.box-description p {
+  color: #666;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+.example {
+  background: #f0f9ff;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-weight: 600;
+  color: #1e40af;
+}
+
+.warning {
+  background: #fef2f2;
+  color: #991b1b;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 0.75rem 0.75rem 0.75rem 2rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.dollar-sign {
+  position: absolute;
+  left: 12px;
+  font-size: 1.2rem;
+  color: #666;
+  font-weight: 600;
+}
+
+.quick-amounts {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.quick-amounts button {
+  padding: 0.5rem;
+  border: 2px solid #e5e7eb;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.direction-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.btn-long {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 1rem;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-short {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  padding: 1rem;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.position-active {
+  background: #f0fdf4;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  border: 2px solid #10b981;
+  color: #059669;
+  font-weight: 600;
+}

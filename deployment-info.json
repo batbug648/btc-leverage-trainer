@@ -1,0 +1,11 @@
+{
+  "network": "fuji",
+  "chainId": "43113",
+  "deployer": "0x4799d7Bf70371A396E3415336DD821586A72D37e",
+  "timestamp": "2026-02-05T21:43:54.819Z",
+  "contracts": {
+    "PredictionCore": "0xDb5a326Aa1d97165EE8d513c0BB544Ca14E72A31",
+    "AchievementNFT": "0x06aaa3682e2e7C411D3C301d2f73E9C9d19C0AbA",
+    "Leaderboard": "0xa7792c2736b9f187077c09Ff722dcf16BD314670"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "network": "fuji",
+  "contract": {
+    "BTCLeverageTrainer": "0x0cCd25D6Fff08f2443089c7A230415a0721296B3"
+  }
+}
