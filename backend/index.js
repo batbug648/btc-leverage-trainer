@@ -1,4 +1,4 @@
-require('dotenv').config();
+
 const { ethers } = require('ethers');
 const axios = require('axios');
 const cron = require('node-cron');
