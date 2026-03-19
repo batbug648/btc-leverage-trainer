@@ -1,7 +1,7 @@
 import React from 'react';
 import './UserBalance.css';
 
-function UserBalance({ balance, stats, onClaimBonus }) {
+function UserBalance({ balance, stats, onClaimBonus, onRefund }) {
   const winRate = stats && stats.totalTrades > 0 
     ? ((stats.winningTrades / stats.totalTrades) * 100).toFixed(1) 
     : '0.0';
@@ -9,9 +9,11 @@ function UserBalance({ balance, stats, onClaimBonus }) {
   return (
     <div className="user-balance">
       <h3>Your Trading Account</h3>
-      <button className="bonus-btn" onClick={onClaimBonus}>
-        🎁 Claim Daily Bonus
-      </button>
+      {balance <= 0 && (
+  <button className="refund-btn" onClick={onRefund}>
+    💵 Refund Account ($1,000)
+  </button>
+)}
       
       <div className="stats-grid">
         <div className="stat-card">

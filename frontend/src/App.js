@@ -89,7 +89,18 @@ function App() {
       console.error('Error loading user data:', error);
     }
   };
-
+const handleRefund = async () => {
+  if (!contract) return;
+  try {
+    const tx = await contract.initializeAccount();
+    await tx.wait();
+    alert('💵 Account refunded! You have $1,000 again.');
+    loadUserData(contract, account);
+  } catch (error) {
+    console.error('Error refunding:', error);
+    alert('Balance must be $0 to refund.');
+  }
+};
   const handleClaimBonus = async () => {
     if (!contract) return;
     try {
@@ -160,11 +171,12 @@ function App() {
           </div>
         ) : (
           <>
-            <UserBalance 
-              balance={userBalance}
-              stats={userStats}
-              onClaimBonus={handleClaimBonus}
-            />
+           <UserBalance 
+  balance={userBalance}
+  stats={userStats}
+  onClaimBonus={handleClaimBonus}
+  onRefund={handleRefund}
+/>
 
             <PositionHistory 
               contract={contract}
